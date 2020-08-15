@@ -36,6 +36,7 @@ public class Trie {
             if (i == word.length() - 1) {
                 t.isLeaf = true;
                 t.value = value;
+                t.key = word;
             }
         }
     }

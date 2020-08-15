@@ -23,10 +23,28 @@ public class Database {
         for (TrieNode result : following) {
             System.out.println(result.value);
         }
+        System.out.println("Query between");
+        for (Result result : db.query_between("user#samsquire", "message#2020-06-01", "message#2020-07-01")) {
+
+            System.out.println(result);
+        }
+
         System.out.println("Messages sent by users");
         for (Result result : db.pk_begins_with("message", "user")) {
             System.out.println(result);
         }
+    }
+
+    private List<Result> query_between(String partitionKey, String fromKey, String toKey) {
+        List<Result> results = new ArrayList<Result>();
+
+        for (TrieNode trieNode : sortIndex.searchNode(partitionKey + ":" + fromKey)) {
+            results.add(new Result(trieNode.value, db.get(trieNode.key)));
+        }
+        for (TrieNode trieNode : sortIndex.searchNode(partitionKey + ":" + toKey)) {
+            results.add(new Result(trieNode.value, db.get(trieNode.key)));
+        }
+        return results;
     }
 
     private List<Result> pk_begins_with(String partitionKey, String sortKey) {
