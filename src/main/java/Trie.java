@@ -3,6 +3,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/*
+This code is based off https://www.programcreek.com/2014/05/leetcode-implement-trie-prefix-tree-java/
+But changed to produce collections
+ */
+
 public class Trie {
     private TrieNode root;
 
