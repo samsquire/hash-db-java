@@ -1,18 +1,21 @@
 public class Result {
-    private final Object sortKey;
+    private final Object partitionKey;
     private final Object attributes;
+    private final String sortKey;
 
-    public Result(Object sortKey, Object value) {
+    public Result(Object partitionKey, Object value, String sortKey) {
 
-        this.sortKey = sortKey;
+        this.partitionKey = partitionKey;
         this.attributes = value;
+        this.sortKey = sortKey;
     }
 
     @Override
     public String toString() {
         return "Result{" +
-                "sortKey=" + sortKey +
+                "partitionKey=" + partitionKey +
                 ", attributes=" + attributes +
+                ", sortKey='" + sortKey + '\'' +
                 '}';
     }
 }

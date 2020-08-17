@@ -2,6 +2,7 @@ import java.util.HashMap;
 
 class TrieNode {
     public String key;
+    public String sortKey;
     char c;
     public Object value = null;
     HashMap<Character, TrieNode> children = new HashMap<Character, TrieNode>();

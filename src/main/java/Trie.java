@@ -16,7 +16,7 @@ public class Trie {
     }
 
     // Inserts a word into the trie.
-    public void insert(String word, Object value) {
+    public void insert(String word, Object value, String sortKey) {
         HashMap<Character, TrieNode> children = root.children;
 
         for (int i = 0; i < word.length(); i++) {
@@ -37,6 +37,7 @@ public class Trie {
                 t.isLeaf = true;
                 t.value = value;
                 t.key = word;
+                t.sortKey = sortKey;
             }
         }
     }
@@ -56,7 +57,11 @@ public class Trie {
                 return null;
             }
         }
-        descend(results, children);
+        if (t.isLeaf) {
+            results.add(t);
+        } else {
+            descend(results, children);
+        }
 
         return results;
     }
