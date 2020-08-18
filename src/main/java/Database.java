@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Database {
     private Map<String, Object> db = new HashMap<>();
@@ -28,86 +25,86 @@ public class Database {
                         "readstatus", "UNREAD"),
                 "readstatus");
 
-        List<Result> following = db.begins_with("user#samsquire", "following");
+        List<Result> following = db.begins_with("user#samsquire", "following", SortOrder.ASCENDING);
         System.out.println("Following samsquire");
         for (Result result : following) {
             System.out.println(result);
         }
         System.out.println("Query between");
-        for (Result result : db.query_between("user#samsquire", "message#2020-06-01", "message#2020-07-01")) {
+        for (Result result : db.query_between("user#samsquire", "message#2020-06-01", "message#2020-07-01", SortOrder.ASCENDING)) {
 
             System.out.println(result);
         }
 
         System.out.println("Messages sent by users");
-        for (Result result : db.pk_begins_with("message", "user")) {
+        for (Result result : db.pk_begins_with("message", "user", SortOrder.DESCENDING)) {
             System.out.println(result);
         }
 
         System.out.println("Read messages by dinar");
-        List<Result> read = db.begins_with("index1", "user#dinar", "READ");
+        List<Result> read = db.begins_with("index1", "user#dinar", "READ", SortOrder.ASCENDING);
         for (Result result : read) {
             System.out.println(result);
         }
 
         System.out.println("Users with UNREAD messages");
-        List<Result> usersWithUnread = db.pk_begins_with("index1", "UNREAD", "user");
+        List<Result> usersWithUnread = db.pk_begins_with("index1", "UNREAD", "user", SortOrder.ASCENDING);
         for (Result result : usersWithUnread) {
             System.out.println(result);
         }
 
     }
 
-    private List<Result> query_between(String partitionKey, String fromKey, String toKey) {
+    private List<Result> query_between(String partitionKey, String fromKey, String toKey, SortOrder order) {
         List<Result> results = new ArrayList<Result>();
 
-        for (TrieNode trieNode : sortIndex.searchNode(partitionKey + ":" + fromKey)) {
-            results.add(new Result(trieNode.value, db.get(trieNode.key), trieNode.sortKey));
+        for (TrieNode trieNode : sortIndex.searchNode(partitionKey + ":" + fromKey, order)) {
+            results.add(new Result(trieNode.value, db.get(trieNode.key), trieNode.sortKey, trieNode.value));
         }
-        for (TrieNode trieNode : sortIndex.searchNode(partitionKey + ":" + toKey)) {
-            results.add(new Result(trieNode.value, db.get(trieNode.key), trieNode.sortKey));
+        for (TrieNode trieNode : sortIndex.searchNode(partitionKey + ":" + toKey, order)) {
+            results.add(new Result(trieNode.value, db.get(trieNode.key), trieNode.sortKey, trieNode.value));
         }
         return results;
     }
 
-    private List<Result> pk_begins_with(String partitionKey, String sortKey) {
+    private List<Result> pk_begins_with(String partitionKey, String sortKey, SortOrder order) {
         List<Result> results = new ArrayList<Result>();
-        for (TrieNode trieNode : sortIndex.searchNode(partitionKey)) {
-            for (TrieNode result : ((Trie)trieNode.value).searchNode(sortKey)) {
-                results.add(new Result(result.value, db.get(result.value), trieNode.sortKey));
+        for (TrieNode trieNode : sortIndex.searchNode(partitionKey, order)) {
+            for (TrieNode result : ((Trie)trieNode.value).searchNode(sortKey, order)) {
+                results.add(new Result(result.value, db.get(result.value), trieNode.sortKey, result.value));
             }
         }
         return results;
     }
 
 
-    private List<Result> pk_begins_with(String indexName, String partitionKey, String sortKey) {
+    private List<Result> pk_begins_with(String indexName, String partitionKey, String sortKey, SortOrder order) {
         Trie secondaryIndex = secondaryIndexes.get(indexName);
         List<Result> results = new ArrayList<Result>();
-        for (TrieNode trieNode : secondaryIndex.searchNode(partitionKey)) {
-            for (TrieNode result : ((Trie)trieNode.value).searchNode(sortKey)) {
-                results.add(new Result(result.key, db.get(result.value), trieNode.sortKey));
+        for (TrieNode trieNode : secondaryIndex.searchNode(partitionKey, order)) {
+            for (TrieNode result : ((Trie)trieNode.value).searchNode(sortKey, order)) {
+                results.add(new Result(result.key, db.get(result.value), trieNode.sortKey, result.value));
             }
         }
         return results;
     }
 
-    private List<Result> begins_with(String partitionKey, String query) {
+    private List<Result> begins_with(String partitionKey, String query, SortOrder order) {
         List<Result> results = new ArrayList<>();
-        for (TrieNode trieNode : sortIndex.searchNode(partitionKey + ":" + query)) {
-            results.add(new Result(trieNode.value, db.get(trieNode.key), trieNode.sortKey));
-        };
+        for (TrieNode trieNode : sortIndex.searchNode(partitionKey + ":" + query, order)) {
+            results.add(new Result(trieNode.value, db.get(trieNode.key), trieNode.sortKey, trieNode.value));
+        }
         return results;
     }
 
-    private List<Result> begins_with(String indexName, String partitionKey, String query) {
+    private List<Result> begins_with(String indexName, String partitionKey, String query, SortOrder order) {
         List<Result> results = new ArrayList<>();
-        List<TrieNode> trieNodes = secondaryIndexes.get(indexName).searchNode(partitionKey + ":" + query);
+        List<TrieNode> trieNodes = secondaryIndexes.get(indexName).searchNode(partitionKey + ":" + query, order);
         if (trieNodes == null) {
             return results;
         }
         for (TrieNode trieNode : trieNodes) {
-            results.add(new Result(trieNode.key, db.get(trieNode.value), trieNode.sortKey));
+            results.add(new Result(trieNode.key, db.get(trieNode.value), trieNode.sortKey, trieNode.value));
         }
         return results;
     }

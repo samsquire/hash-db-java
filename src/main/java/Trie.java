@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /*
 This code is based off https://www.programcreek.com/2014/05/leetcode-implement-trie-prefix-tree-java/
@@ -17,7 +14,7 @@ public class Trie {
 
     // Inserts a word into the trie.
     public void insert(String word, Object value, String sortKey) {
-        HashMap<Character, TrieNode> children = root.children;
+        Map<Character, TrieNode> children = root.children;
 
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);
@@ -44,8 +41,8 @@ public class Trie {
 
 
 
-    public List<TrieNode> searchNode(String str) {
-        Map<Character, TrieNode> children = root.children;
+    public List<TrieNode> searchNode(String str, SortOrder order) {
+        TreeMap<Character, TrieNode> children = root.children;
         TrieNode t = null;
         List<TrieNode> results = new ArrayList<TrieNode>();
         for (int i = 0; i < str.length(); i++) {
@@ -60,18 +57,32 @@ public class Trie {
         if (t.isLeaf) {
             results.add(t);
         } else {
-            descend(results, children);
+            if (order == SortOrder.ASCENDING) {
+                descendAscending(results, children, order);
+            } else {
+                descendDescending(results, children, order);
+            }
         }
 
         return results;
     }
 
-    private void descend(List<TrieNode> results, Map<Character, TrieNode> children) {
+    private void descendDescending(List<TrieNode> results, TreeMap<Character,TrieNode> children, SortOrder order) {
+        for (TrieNode t : children.descendingMap().values()) {
+            if (t.isLeaf) {
+                results.add(t);
+            } else {
+                descendDescending(results, t.children, order);
+            }
+        }
+    }
+
+    private void descendAscending(List<TrieNode> results, Map<Character, TrieNode> children, SortOrder order) {
         for (TrieNode t : children.values()) {
             if (t.isLeaf) {
                 results.add(t);
             } else {
-                descend(results, t.children);
+                descendAscending(results, t.children, order);
             }
         }
     }

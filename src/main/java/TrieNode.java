@@ -1,11 +1,13 @@
 import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 class TrieNode {
     public String key;
     public String sortKey;
     char c;
     public Object value = null;
-    HashMap<Character, TrieNode> children = new HashMap<Character, TrieNode>();
+    TreeMap<Character, TrieNode> children = new TreeMap<Character, TrieNode>();
     boolean isLeaf;
 
     public TrieNode(char c, Object value) {
